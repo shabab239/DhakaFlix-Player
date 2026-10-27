@@ -110,6 +110,8 @@ pub struct App {
     pub search_kind: index::SearchKind,
     /// Limit search to one library / folder (URL prefix).
     pub search_scope: Option<String>,
+    /// DHAKAFLIX_NO_POSTERS=1: draw placeholders instead of server artwork (for public screenshots).
+    no_posters: bool,
 }
 
 impl App {
@@ -147,6 +149,7 @@ impl App {
             index: index::Index::load(),
             search_kind: index::SearchKind::All,
             search_scope: None,
+            no_posters: std::env::var_os("DHAKAFLIX_NO_POSTERS").is_some(),
             cfg,
         };
         // Warm up every library root so tiles can show counts / offline state.
@@ -212,6 +215,9 @@ impl App {
     }
 
     pub fn tex_get(&mut self, kind: &str, url: &str) -> Option<egui::TextureHandle> {
+        if self.no_posters {
+            return None;
+        }
         self.tex.get(&self.ctx, &self.pool, kind, url)
     }
 
